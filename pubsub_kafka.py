@@ -1,19 +1,25 @@
 from kafka import KafkaProducer, KafkaConsumer
+from kafka.errors import NoBrokersAvailable
 import threading
 import json
-
+import os
 
 class KafkaPubSubManager:
     def __init__(self, bootstrap_servers="localhost:9092"):
         self.bootstrap_servers = bootstrap_servers
-        self.producer = KafkaProducer(
-            bootstrap_servers=bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode("utf-8")
-        )
+        try:
+            self.producer = KafkaProducer(
+                bootstrap_servers=self.bootstrap_servers,
+                value_serializer=lambda v: json.dumps(v).encode("utf-8")
+            )
+        except NoBrokersAvailable as e:
+            print(f"Kafka broker not reachable: {e}")
+            exit(1)
+        
         self.consumers = {}  # To track active consumers for each topic
 
     def create_topic(self, topic_name):
-        # Kafka topics are created automatically upon first use, but explicit creation can be handled externally.
+        # Kafka topics are created automatically upon first use.
         print(f"Kafka topic '{topic_name}' will be created upon first use.")
 
     def publish(self, topic_name, message, priority=1):
@@ -28,7 +34,7 @@ class KafkaPubSubManager:
                 topic_name,
                 bootstrap_servers=self.bootstrap_servers,
                 auto_offset_reset="earliest",
-                group_id=group_id,  # Consumer group for load balancing
+                group_id=group_id,
                 value_deserializer=lambda x: json.loads(x.decode("utf-8"))
             )
             self.consumers[topic_name] = consumer
@@ -67,20 +73,16 @@ class KafkaPubSubManager:
         else:
             print(f"No undelivered messages found for topic '{topic_name}'.")
 
-
 # Example subscriber functions
 def subscriber_one(message):
     print(f"Subscriber One received: {message}")
 
-
 def subscriber_two(message):
     print(f"Subscriber Two received: {message}")
-
 
 # Example filter: Only receive messages containing "Python"
 def python_filter(message):
     return "Python" in message
-
 
 # Example Usage
 if __name__ == "__main__":
