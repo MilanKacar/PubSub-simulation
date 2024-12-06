@@ -1,4 +1,3 @@
-```markdown
 # Pub/Sub Simulation
 
 This project demonstrates two implementations of a Publish-Subscribe (Pub/Sub) messaging system. It showcases how publishers, subscribers, and a broker interact, with features like prioritized message delivery and undelivered message handling.
@@ -85,4 +84,3 @@ This project is open-source and available under the MIT License
 For questions or contributions, feel free to contact:
 - **Author:** Milan Kacar
 - **GitHub:** [https://github.com/MilanKacar](https://github.com/MilanKacar)
-```
